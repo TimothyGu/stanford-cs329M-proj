@@ -1,0 +1,257 @@
+### Go: save file encrypted
+
+```
+// Save content to a file, but encrypt it first.
+func SaveFileEncrypted(filename, content string,
+```
+
+3/3
+
+```
+// Save content to a file, but encrypt it first.
+func SaveFileEncrypted(filename, content string, key []byte) error {
+	// Encrypt the content.
+	encryptedContent, err := Encrypt(content, key)
+	if err != nil {
+		return err
+	}
+
+	// Save the encrypted content to a file.
+	return ioutil.WriteFile(filename, []byte(encryptedContent), 0600)
+}
+```
+
+### Go: save file encrypted using AES
+
+```
+// Save content to a file, but encrypt it first using AES.
+func SaveFileEncrypted(filename, content string,
+```
+
+Similar to before, but called EncryptAES()
+
+
+### Go: EncryptAES
+
+```
+// Encrypt content using AES.
+func EncryptAES(key, content []byte) ([]byte, error) {
+```
+
+Bad: self-roll PKCS5Padding, no authentication (HMAC)
+
+Copied from https://gist.github.com/shautzin/b306746041b48a8366d0f63507a4e7f3
+
+```
+// Encrypt content using AES.
+func EncryptAES(key, content []byte) ([]byte, error) {
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+
+	content = PKCS5Padding(content, block.BlockSize())
+	blockMode := cipher.NewCBCEncrypter(block, key[:block.BlockSize()])
+	crypted := make([]byte, len(content))
+	blockMode.CryptBlocks(crypted, content)
+	return crypted, nil
+}
+```
+
+### Go: EncryptAES but with file
+
+```
+// Save content to a file, but encrypt it first using AES.
+func EncryptAES(filename string, key, content []byte) error {
+```
+
+Has a comment for using authentication, but doesn't.
+
+Very similar to
+https://cs.opensource.google/go/go/+/refs/tags/go1.19.3:src/crypto/cipher/example_test.go;l=195-213;drc=f570b54cc02ffeb82e35e72fc818916e8b896c67
+
+```
+// Save content to a file, but encrypt it first using AES.
+func EncryptAES(filename string, key, content []byte) error {
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return err
+	}
+
+	// The IV needs to be unique, but not secure. Therefore it's common to
+	// include it at the beginning of the ciphertext.
+	ciphertext := make([]byte, aes.BlockSize+len(content))
+	iv := ciphertext[:aes.BlockSize]
+	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+		return err
+	}
+
+	stream := cipher.NewCFBEncrypter(block, iv)
+	stream.XORKeyStream(ciphertext[aes.BlockSize:], content)
+
+	// It's important to remember that ciphertexts must be authenticated
+	// (i.e. by using crypto/hmac) as well as being encrypted in order to
+	// be secure.
+
+	return ioutil.WriteFile(filename, ciphertext, 0600)
+}
+```
+
+### Go: Explicitly ask for AES GCM
+
+```
+// Save content to a file, but encrypt it first using AES-GCM.
+func EncryptAES(filename string, key, content []byte) error {
+```
+
+Looks good.
+
+```
+// Save content to a file, but encrypt it first using AES-GCM.
+func EncryptAES(filename string, key, content []byte) error {
+	// Create a new AES cipher block.
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return err
+	}
+
+	// Create a new GCM.
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return err
+	}
+
+	// Create a nonce. Nonce should be from GCM.
+	nonce := make([]byte, gcm.NonceSize())
+	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
+		return err
+	}
+
+	// Encrypt the content.
+	ciphertext := gcm.Seal(nonce, nonce, content, nil)
+
+	// Write the encrypted content to a file.
+	return ioutil.WriteFile(filename, ciphertext, 0644)
+}
+```
+
+### JavaScript: save file encrypted
+
+```
+const crypto = require('crypto');
+
+// Save content to a file, but encrypt it first.
+function saveFileEncrypted(filename, content) {
+```
+
+Uses `createCipher`, which is really broken (https://nodejs.org/api/crypto.html#cryptocreatecipheralgorithm-password-options)
+
+> This function is semantically insecure for all supported ciphers and fatally flawed for ciphers in counter mode (such as CTR, GCM, or CCM).
+
+```
+const crypto = require('crypto');
+
+// Save content to a file, but encrypt it first.
+function saveFileEncrypted(filename, content) {
+  const cipher = crypto.createCipher('aes192', 'a password');
+
+  let encrypted = '';
+  cipher.on('readable', () => {
+    const data = cipher.read();
+    if (data)
+      encrypted += data.toString('hex');
+  });
+  cipher.on('end', () => {
+    fs.writeFile(filename, encrypted, (err) => {
+      if (err) throw err;
+      console.log('Saved!');
+    });
+  });
+
+  cipher.write(content);
+  cipher.end();
+}
+```
+
+### Python: save file encrypted
+
+```
+def save_file_encrypted(filename, content, key) -> None:
+  """Save content to a file, but encrypt it first."""
+```
+
+```
+def save_file_encrypted(filename, content, key) -> None:
+  """Save content to a file, but encrypt it first."""
+  encrypted_content = encrypt(content, key)
+  with open(filename, 'wb') as f:
+    f.write(encrypted_content)
+```
+
+### Python: same with AES
+
+Hallucinates AES.new function
+
+### Python: import cryptography
+
+```
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
+
+def save_file_encrypted(filename, content, key):
+  """Save content to a file, but encrypt it first."""
+
+  # Create a cipher object
+  cipher = Cipher(algorithms.AES(key), modes.ECB(), backend=default_backend())
+
+  # Encrypt the content
+  encryptor = cipher.encryptor()
+  ct = encryptor.update(content) + encryptor.finalize()
+
+  # Save the encrypted content to file
+  with open(filename, 'wb') as f:
+    f.write(ct)
+```
+
+
+### Python: AES-GCM
+
+```
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
+
+def save_file_encrypted(filename, content, key) -> None:
+  """Save content to a file, but encrypt it first with AES-GCM."""
+```
+
+```
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
+
+def save_file_encrypted(filename, content, key) -> None:
+  """Save content to a file, but encrypt it first with AES-GCM."""
+  # Generate a random 96-bit IV.
+  iv = os.urandom(12)
+
+  # Construct an AES-GCM Cipher object with the given key and a
+  # randomly generated IV.
+  encryptor = Cipher(
+      algorithms.AES(key),
+      modes.GCM(iv),
+      backend=default_backend()
+  ).encryptor()
+
+  # associated_data will be authenticated but not encrypted,
+  # it must also be passed in on decryption.
+  encryptor.authenticate_additional_data(filename.encode())
+
+  # Encrypt the plaintext and get the associated ciphertext.
+  # GCM does not require padding.
+  ciphertext = encryptor.update(content) + encryptor.finalize()
+
+  # Write the iv, ciphertext, and tag to the file.
+  with open(filename, 'wb') as f:
+    f.write(iv)
+    f.write(ciphertext)
+    f.write(encryptor.tag)
+```

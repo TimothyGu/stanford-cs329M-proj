@@ -1,0 +1,77 @@
+### Python: save file encrypted
+
+```
+def save_file_encrypted(filename: str, content: str) -> None:
+  """Save content to a file, but encrypt it first."""
+```
+
+```
+def save_file_encrypted(filename: str, content: str) -> None:
+  """Save content to a file, but encrypt it first."""
+
+  # Encrypt the content first
+  encrypted_content = encrypt(content)
+  
+  # Save the encrypted content to a file
+  with open(filename, 'w') as f:
+    f.write(encrypted_content)
+  
+  print(f'File {filename} saved successfully.')
+```
+
+### Python: same with AES
+
+uses encrypt_aes
+
+### Python: import cryptography
+
+```
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
+
+def save_file_encrypted(filename, content, key):
+  """Save content to a file, but encrypt it first."""
+```
+
+```
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
+
+def save_file_encrypted(filename, content, key):
+  """Save content to a file, but encrypt it first."""
+  
+  backend = default_backend()
+  cipher = Cipher(algorithms.AES(key), modes.ECB(), backend=backend)
+  encryptor = cipher.encryptor()
+  with open(filename, 'wb') as f:
+    f.write(encryptor.update(content))
+    f.write(encryptor.finalize())
+```
+
+### Python: 
+
+
+### JavaScript: save file encrypted
+
+```
+const crypto = require('crypto');
+
+// Save content to a file, but encrypt it first.
+function saveFileEncrypted(filename, content) {
+```
+
+Uses `createCipher`, which is really broken (https://nodejs.org/api/crypto.html#cryptocreatecipheralgorithm-password-options)
+
+> This function is semantically insecure for all supported ciphers and fatally flawed for ciphers in counter mode (such as CTR, GCM, or CCM).
+
+```
+const crypto = require('crypto');
+
+// Save content to a file, but encrypt it first.
+function saveFileEncrypted(filename, content) {
+    const cipher = crypto.createCipher('aes-256-cbc', 'secret');
+    let encrypted = cipher.update(content, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    fs.writeFileSync(filename, encrypted);
+}
+```

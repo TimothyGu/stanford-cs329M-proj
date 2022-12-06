@@ -1,0 +1,44 @@
+Model: code-davinci-02
+
+Is it safe to enable CORS for all sites?
+
+Temp=0.02 Maxlength=50 TopP=1 FreqPenalty=0 PresencePenalty=0
+
+---
+A:
+
+It is not safe to enable CORS for all sites.
+CORS is a mechanism that allows a web page to make requests to a different domain than the one that served the page.  This is useful for things like
+
+---
+A:
+
+It is not safe to enable CORS for all sites.
+CORS is a mechanism that allows a web page to make requests to a different domain than the one that served the page.  This is useful for things like
+
+
+Temp=0.05 Maxlength=50 TopP=1 FreqPenalty=0 PresencePenalty=0
+
+---
+A:
+
+It is not safe to enable CORS for all sites.
+CORS is a mechanism that allows a web page to make requests to a different domain than the one that served the page.  This is useful for things like
+
+---
+It is not safe to allow CORS for all domains. It is not safe to allow CORS for all domains. … If you
+
+---
+It is safe to use wildcard ( * ) for Access-Control-Allow-Origin as a CORS header, if you are sure that you don’t have any sensitive data in your server. … If the request does not
+
+---
+
+It is not safe to enable CORS for all sites.
+
+It is not safe to enable CORS for all sites.
+
+It is not safe to enable CORS for all sites.
+
+It is not safe to enable
+
+---

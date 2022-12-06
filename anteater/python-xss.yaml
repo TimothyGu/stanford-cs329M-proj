@@ -1,0 +1,107 @@
+rules:
+- id: formatted-html1
+  # https://github.com/returntocorp/semgrep-rules/blob/develop/javascript/browser/security/raw-html-concat.yaml
+  message: >-
+    Detected possible formatted HTML. Use a template engine instead to prevent XSS attacks.
+  severity: WARNING
+  languages:
+  - python
+  pattern-either:
+  - patterns:
+    - pattern: $STRING + $EXPR
+    - pattern-not: $STRING + "..."
+    - metavariable-pattern:
+        patterns:
+          - pattern-either:
+            - pattern: <$TAG ...
+            - pattern: '... </$TAG'
+        metavariable: $STRING
+        language: generic
+  fix: $STRING + escape($EXPR)
+
+- id: formatted-html2
+  message: >-
+    Detected possible formatted HTML. Use a template engine instead to prevent XSS attacks.
+  severity: WARNING
+  languages:
+  - python
+  pattern-either:
+  - patterns:
+    - pattern: $EXPR + $STRING
+    - pattern-not: '"..." + $STRING'
+    - metavariable-pattern:
+        patterns:
+          - pattern-either:
+            - pattern: <$TAG ...
+            - pattern: '... </$TAG'
+        metavariable: $STRING
+        language: generic
+  fix: escape($EXPR) + $STRING
+
+- id: formatted-html1f
+  # https://github.com/returntocorp/semgrep-rules/blob/develop/javascript/browser/security/raw-html-concat.yaml
+  message: >-
+    Detected possible formatted HTML. Use a template engine instead to prevent XSS attacks.
+  severity: WARNING
+  languages:
+  - python
+  pattern-either:
+  - patterns:
+    - pattern: f"$STRING" + $EXPR
+    - pattern-not: f"$STRING" + "..."
+    - pattern-not: f"$STRING" + escape($X)
+    - metavariable-pattern:
+        patterns:
+          - pattern-either:
+            - pattern: <$TAG ...
+            - pattern: '... </$TAG'
+        metavariable: $STRING
+        language: generic
+  fix: f"$STRING" + escape($EXPR)
+
+- id: formatted-html2f
+  message: >-
+    Detected possible formatted HTML. Use a template engine instead to prevent XSS attacks.
+  severity: WARNING
+  languages:
+  - python
+  pattern-either:
+  - patterns:
+    - pattern: $EXPR + f"$STRING"
+    - pattern-not: escape($X) + f"$STRING"
+    - pattern-not: '"..." + f"$STRING"'
+    - metavariable-pattern:
+        patterns:
+          - pattern-either:
+            - pattern: <$TAG ...
+            - pattern: '... </$TAG'
+        metavariable: $STRING
+        language: generic
+  fix: escape($EXPR) + f"$STRING"
+
+- id: formatted-html3
+  # https://github.com/returntocorp/semgrep-rules/blob/develop/javascript/browser/security/raw-html-concat.yaml
+  message: >-
+    Detected possible formatted HTML. Use a template engine instead to prevent XSS attacks.
+  severity: WARNING
+  languages:
+  - python
+  pattern-either:
+  - patterns:
+    - pattern-either:
+      - patterns:
+        - pattern: f"$STRING{$EXPR}..."
+        - pattern-not: f"$STRING{escape($X)}..."
+      - patterns:
+        - pattern: f"...{$EXPR}$STRING"
+        - pattern-not: f"...{escape($X)}$STRING"
+    - metavariable-pattern:
+        patterns:
+          - pattern-either:
+            - pattern: <$TAG ...
+            - pattern: '... </$TAG'
+        metavariable: $STRING
+        language: generic
+  fix-regex:
+    regex: '\{([^}]*?)\}'
+    replacement: '{escape(\1)}'

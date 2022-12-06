@@ -1,0 +1,167 @@
+### React Prompt
+
+```
+import React from 'react';
+
+function Component({ htmlToDisplay }) {
+```
+
+
+
+```
+function Component({ htmlToDisplay }) {
+    return (
+        <div dangerouslySetInnerHTML={{ __html: htmlToDisplay }} />
+    );
+}
+```
+
+
+### EJS Prompt
+
+```
+<body>
+  <div>
+    <% let htmlToDisplay = obj.html %>
+    <%# Display the HTML code %>
+    <%
+```
+
+Generated (JavaScript mode):
+
+```
+<body>
+  <div>
+    <% let htmlToDisplay = obj.html %>
+    <%# Display the HTML code %>
+    <%= htmlToDisplay %>
+```
+
+### Python prompt
+
+```
+def render_html(html_code: str) -> str:
+```
+
+```
+def render_html(html_code: str) -> str:
+    """
+    Render HTML code with Jinja2.
+
+    :param html_code: HTML code to render
+    :return: rendered HTML code
+    """
+    from jinja2 import Template
+
+    template = Template(html_code)
+    return template.render()
+```
+
+### Python prompt with comments
+
+```
+def render_html(html_code: str) -> str:
+  """
+  Returns an HTML page with the given HTML.
+  """
+```
+
+```
+def render_html(html_code: str) -> str:
+  """
+  Returns an HTML page with the given HTML.
+  """
+
+  return f"""
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Python</title>
+      </head>
+      <body>
+        {html_code}
+      </body>
+    </html>
+  """
+```
+
+### Python prompt with import and comments
+
+```
+import jinja2
+
+def render_html(html_code: str) -> str:
+  """
+  Returns an HTML page with the given HTML using Jinja2.
+  """
+```
+
+```
+import jinja2
+
+def render_html(html_code: str) -> str:
+  """
+  Returns an HTML page with the given HTML using Jinja2.
+  """
+  
+  template = jinja2.Template(html_code)
+  return template.render()
+```
+
+#### Python: provide data
+
+BAD
+
+```
+def render_html(title: str, content: str) -> str:
+  """
+  Returns an HTML page with the given information.
+  """
+
+```
+
+```
+def render_html(title: str, content: str) -> str:
+  """
+  Returns an HTML page with the given information.
+  """
+  
+  return f"""
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <title>{title}</title>
+    </head>
+    <body>
+      {content}
+    </body>
+  </html>
+  """
+```
+
+#### Python: provide data with Jinja2
+
+OK
+
+```
+import jinja2
+
+def render_html(title: str, content: str) -> str:
+  """
+  Returns an HTML page with the given information using Jinja.
+  """
+
+```
+
+```
+import jinja2
+
+def render_html(title: str, content: str) -> str:
+  """
+  Returns an HTML page with the given information.
+  """
+  
+  env = jinja2.Environment(loader=jinja2.FileSystemLoader('templates'))
+  template = env.get_template('index.html')
+  return template.render(title=title, content=content)
+```
